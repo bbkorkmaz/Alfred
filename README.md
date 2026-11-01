@@ -90,6 +90,12 @@ Kodun neredeyse tamamı `lib/main.dart` dosyasındadır. Android'e özgü parça
 
 Kişisel kullanım için geliştirilen, sürekli değişen bir projedir. Yalnızca Android'de denenmiştir.
 
+### Lisans
+
+[MIT](LICENSE). Kodu kullanabilir, değiştirebilir ve paylaşabilirsin; lisans metnini ve telif satırını korumak yeterli.
+
+Alfred **olduğu gibi** sunulur, hiçbir garanti verilmez. Uygulamanın kullanımından doğabilecek veri kaybı, kaçırılan hatırlatma veya hatalı hesaplama gibi sonuçlardan geliştirici sorumlu tutulamaz. Önemli bilgilerini yalnızca Alfred'e bırakma ve düzenli yedek al. Finans bölümü kişisel takip içindir; mali danışmanlık yerine geçmez.
+
 ---
 
 ## English
@@ -167,3 +173,9 @@ Almost all of the code lives in `lib/main.dart`. Android-specific parts (widget,
 ### Status
 
 A personal project under active development. Tested on Android only.
+
+### License
+
+[MIT](LICENSE). You may use, modify and share the code as long as the license text and copyright notice are kept.
+
+Alfred is provided **as is**, without warranty of any kind. The developer cannot be held liable for any outcome of using the app, such as data loss, missed reminders or incorrect calculations. Don't rely on Alfred alone for important information, and back up regularly. The finance section is for personal tracking and is not financial advice.
