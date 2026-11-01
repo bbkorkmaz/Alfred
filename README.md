@@ -67,7 +67,7 @@ Alfred hesap istemez ve verilerini hiçbir sunucuya göndermez. Her şey telefon
 
 ### Kurulum
 
-1. [Releases](../../releases) sayfasından en son `app-release.apk` dosyasını indir.
+1. [Releases](../../releases) sayfasından en son sürümün APK dosyasını (ör. `Alfred-1.0.0.apk`) indir.
 2. Telefonda dosyayı aç. Android "bilinmeyen kaynaklardan yükleme" izni isteyebilir; bu izni yalnızca kurulum için ver.
 3. İlk açılışta bildirim izni ver. Hatırlatmaların zamanında gelmesi için Ayarlar → Bildirimler bölümündeki önerileri (tam zamanlı alarm, pil kısıtlamasını kaldırma) uygulaman iyi olur.
 
@@ -145,7 +145,7 @@ Alfred asks for no account and sends your data to no server. Everything is store
 
 ### Installation
 
-1. Download the latest `app-release.apk` from the [Releases](../../releases) page.
+1. Download the latest APK (e.g. `Alfred-1.0.0.apk`) from the [Releases](../../releases) page.
 2. Open the file on your phone. Android may ask for permission to install from unknown sources; grant it only for this install.
 3. Allow notifications on first launch. For reminders to arrive on time, follow the suggestions under Settings → Notifications (exact alarms, removing battery restrictions).
 
