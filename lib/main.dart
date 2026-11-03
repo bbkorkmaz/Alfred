@@ -4975,10 +4975,16 @@ class _AnaEkranState extends State<AnaEkran> with WidgetsBindingObserver {
       _bildirimIzinleriniKontrolEt();
       _bildirimleriYenile();
       _widgetBekleyenleriUygula().then((_) => _bildirimYapildilariUygula()).then((_) => _widgetVerisiniGuncelle());
+      // Klavye açıkken başka uygulamaya geçilip dönülünce Android klavyenin kapandığını bazen bildirmiyor;
+      // sayfa klavye varmış gibi kısa kalıyordu. Klavyeyi açıkça kapatmak ekran ölçüsünü tazeler.
+      SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
     } else {
       // Arka plana geçerken bekleyen kaydı hemen yaz
       _kaydetHemen();
       if (state == AppLifecycleState.paused) {
+        // Klavye açık bırakılmasın: dönüşte sayfanın kısa kalmasını önler
+        FocusManager.instance.primaryFocus?.unfocus();
+        SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
         _otomatikYedekAl();
         _widgetVerisiniGuncelle();
       }
