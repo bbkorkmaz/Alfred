@@ -242,6 +242,21 @@ class _KilitEkraniState extends State<KilitEkrani> with WidgetsBindingObserver {
 // Konuşmayı yazıya çevirir ve seçilen metin alanının sonuna ekler. Aynı anda tek alan dinlenir.
 // Telefonun konuşma servisi kısa bir duraksamada oturumu kendiliğinden kapatır; konuşma sürdüğü
 // sürece (en çok 5 dakika) oturum otomatik yeniden başlatılır, yazılan metin korunur.
+// Bir pencere/ekran kapanınca, açık yazı alanı kalmadıysa klavyeyi açıkça kapatır.
+// Bazı Samsung cihazlarda klavye kapanınca ekran ölçüsü güncellenmiyor; bu istek güncellemeyi tetikler.
+class KlavyeGozlemcisi extends NavigatorObserver {
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final BuildContext? odak = FocusManager.instance.primaryFocus?.context;
+      final bool yaziAlaniAcik = odak != null && odak.findAncestorStateOfType<EditableTextState>() != null;
+      if (!yaziAlaniAcik) SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    });
+  }
+}
+
+final KlavyeGozlemcisi klavyeGozlemcisi = KlavyeGozlemcisi();
+
 class SesliYazi {
   final stt.SpeechToText _stt = stt.SpeechToText();
   bool dinliyor = false;
@@ -736,6 +751,7 @@ class _KisiselAsistanAppState extends State<KisiselAsistanApp> with WidgetsBindi
     return MaterialApp(
       title: 'Alfred',
       navigatorKey: _gezginAnahtari,
+      navigatorObservers: [klavyeGozlemcisi],
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -11482,6 +11498,9 @@ class _AnaEkranState extends State<AnaEkran> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Ana sekmelerde klavye için sayfa küçültülmez: Android bazen klavyenin kapandığını bildirmiyor
+      // ve sayfa klavye varmış gibi yarıda kalıyordu. Pencereler ve düzenleme ekranları kendi boşluklarını ayarlar.
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: PageView.builder(
           controller: _sayfaKontrol,
