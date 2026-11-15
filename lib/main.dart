@@ -9202,6 +9202,12 @@ class _AnaEkranState extends State<AnaEkran> with WidgetsBindingObserver {
       final String yeniAktif = yeniListe.any((p) => p.id == yedekAktif) ? yedekAktif! : yeniListe.first.id;
       await prefs.setString('profiller', jsonEncode(yeniListe.map((p) => p.toJson()).toList()));
       await prefs.setString('aktif_profil', yeniAktif);
+      // Bir yedek dosyasından dönüldüyse o dosya telefon dışında bir yedektir: hatırlatma sayacı onun tarihinden başlar
+      if (yedek['otomatik'] != true && yedekTarihi != null && (_sonYedekTarihi == null || yedekTarihi.isAfter(_sonYedekTarihi!))) {
+        _sonYedekTarihi = yedekTarihi;
+        await prefs.setString('son_yedek', yedekTarihi.toIso8601String());
+        await prefs.remove('yedek_ertele');
+      }
 
       // Belleğe yükle
       Map<String, dynamic> aktifVeri = {};
@@ -9274,8 +9280,10 @@ class _AnaEkranState extends State<AnaEkran> with WidgetsBindingObserver {
       builder: (ctx) => AlertDialog(
         title: const Text('Yedek zamanı'),
         content: Text(_sonYedekTarihi == null
-            ? 'Verilerini henüz hiç yedeklemedin. Telefon kaybolursa veya uygulama silinirse kayıtların gider. Şimdi yedek almak ister misin?'
-            : 'Son yedeğin $gecenGun gün önce alındı. Şimdi yeni bir yedek almak ister misin?'),
+            ? (_sonOtoYedek != null
+                ? 'Otomatik yedekler alınıyor ama bunlar telefonun içinde duruyor; telefon kaybolursa veya uygulama silinirse onlar da gider. Telefonun dışına (Drive, bilgisayar) bir yedek kaydetmek ister misin?'
+                : 'Verilerini henüz hiç yedeklemedin. Telefon kaybolursa veya uygulama silinirse kayıtların gider. Şimdi yedek almak ister misin?')
+            : 'Son elle yedeğin $gecenGun gün önce alındı. Otomatik yedekler telefonun içinde kalır; telefonun dışına (Drive, bilgisayar) yeni bir yedek kaydetmek ister misin?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, 'sonra'), child: const Text('Yarın hatırlat')),
           ElevatedButton(style: _anaDugmeStili, onPressed: () => Navigator.pop(ctx, 'yedek'), child: const Text('Yedek al')),
