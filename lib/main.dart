@@ -4110,13 +4110,18 @@ class _AnaEkranState extends State<AnaEkran> with WidgetsBindingObserver {
     }
   }
 
+  Timer? _onizlemeZamanlayici;
+
   // Seçilen sesi hemen bir bildirimle dinletir
   Future<void> _sesOnizle(bool finans) async {
     try {
       await _bildirimKanallariniKur();
       final String ad = (bildirimSesleri[finans ? sesOdeme : sesEtkinlik] ?? bildirimSesleri['sistem']!)[0];
       final String metin = 'Seçtiğin ses: $ad';
-      await flutterLocalNotificationsPlugin.show(999002, 'Alfred • Ses önizleme', metin, NotificationDetails(android: _bildirimDetayi(metin, finans: finans)));
+      // Düğmesiz önizleme bildirimi; ses çaldıktan sonra panelden kendiliğinden kalkar
+      await flutterLocalNotificationsPlugin.show(999002, 'Alfred • Ses önizleme', metin, NotificationDetails(android: _bildirimDetayi(metin, finans: finans, ertele: false)));
+      _onizlemeZamanlayici?.cancel();
+      _onizlemeZamanlayici = Timer(const Duration(seconds: 5), () => flutterLocalNotificationsPlugin.cancel(999002));
     } catch (e) {
       if (mounted) setState(() => _bildirimHatasi = 'Ses önizlemesi gösterilemedi: $e');
     }
