@@ -33,9 +33,12 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      # Flutter sürümü sabit: yeni bir Flutter sürümü çıkınca derleme kendiliğinden bozulmasın.
+      # Bilgisayardaki Flutter güncellenince burası da aynı sürüme çekilir.
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.47.9
           cache: true
 
       - name: İmza anahtarını hazırla
