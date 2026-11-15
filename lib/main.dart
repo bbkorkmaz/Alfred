@@ -3112,6 +3112,50 @@ class _AnaEkranState extends State<AnaEkran> with WidgetsBindingObserver {
     }
   }
 
+  // Yedeğe giren genel tercihler (uygulama kilidi ve ekran gizleme güvenlik nedeniyle dışarıda bırakılır)
+  static const List<String> _yedektekiAyarlar = [
+    'tema_modu', 'guvenilir_mod', 'yedek_hatirlatma_gun', 'oto_yedek_foto', 'oto_yedek_acik', 'oto_yedek_gunu',
+    'hafta_ozeti_acik', 'hafta_ozeti_gunu', 'hafta_ozeti_saati', 'erteleme_dk', 'kategori_hafiza', 'elle_yedek_foto',
+    'ses_etkinlik', 'ses_odeme', 'sessizda_cal', 'titresim_acik', 'sabah_ozeti_acik', 'sabah_ozeti_saati', 'cop_suresi_gun',
+  ];
+
+  // Kayıtlı genel ayarları belleğe okur (açılışta ve yedekten dönünce)
+  void _genelAyarlariOku(SharedPreferences prefs) {
+    bildirimGuvenilirMod = prefs.getBool('guvenilir_mod') ?? true;
+    yedekHatirlatmaGunu = prefs.getInt('yedek_hatirlatma_gun') ?? 14;
+    otoYedekFoto = prefs.getBool('oto_yedek_foto') ?? false;
+    otoYedekAcik = prefs.getBool('oto_yedek_acik') ?? true;
+    final int kayitliOtoGun = prefs.getInt('oto_yedek_gunu') ?? 1;
+    otoYedekGunu = (kayitliOtoGun == 2 || kayitliOtoGun == 3 || kayitliOtoGun == 7) ? kayitliOtoGun : 1;
+    haftaOzetiAcik = prefs.getBool('hafta_ozeti_acik') ?? true;
+    final int kayitliErteleme = prefs.getInt('erteleme_dk') ?? 10;
+    ertelemeDk = const [5, 10, 15, 30, 60].contains(kayitliErteleme) ? kayitliErteleme : 10;
+    final int kayitliHaftaGunu = prefs.getInt('hafta_ozeti_gunu') ?? 7;
+    haftaOzetiGunu = (kayitliHaftaGunu >= 1 && kayitliHaftaGunu <= 7) ? kayitliHaftaGunu : 7;
+    haftaOzetiSaati = prefs.getInt('hafta_ozeti_saati') ?? 960;
+    _sonOtoYedek = DateTime.tryParse(prefs.getString('son_oto_yedek') ?? '');
+    _sonOtoYedekHata = prefs.getString('son_oto_yedek_hata');
+    try {
+      final dynamic hafiza = jsonDecode(prefs.getString('kategori_hafiza') ?? '{}');
+      if (hafiza is Map) _kategoriHafizasi = hafiza.map((k, v) => MapEntry(k.toString(), v.toString()));
+    } catch (_) {
+      _kategoriHafizasi = {};
+    }
+    elleYedekFoto = prefs.getBool('elle_yedek_foto') ?? true;
+    final String? sesE = prefs.getString('ses_etkinlik');
+    final String? sesO = prefs.getString('ses_odeme');
+    if (sesE != null && bildirimSesleri.containsKey(sesE)) sesEtkinlik = sesE;
+    if (sesO != null && bildirimSesleri.containsKey(sesO)) sesOdeme = sesO;
+    sessizdaCal = prefs.getBool('sessizda_cal') ?? false;
+    titresimAcik = prefs.getBool('titresim_acik') ?? true;
+    sabahOzetiAcik = prefs.getBool('sabah_ozeti_acik') ?? true;
+    sabahOzetiSaati = prefs.getInt('sabah_ozeti_saati') ?? 480;
+    final int kayitliCop = prefs.getInt('cop_suresi_gun') ?? 14;
+    copSuresiGun = (kayitliCop == 7 || kayitliCop == 30) ? kayitliCop : 14;
+    final String? tema = prefs.getString('tema_modu');
+    if (tema == 'acik' || tema == 'koyu' || tema == 'sistem') temaModu.value = tema!;
+  }
+
   Future<void> _yukle() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -3179,37 +3223,7 @@ class _AnaEkranState extends State<AnaEkran> with WidgetsBindingObserver {
     }
 
     // Genel ayarlar
-    bildirimGuvenilirMod = prefs.getBool('guvenilir_mod') ?? true;
-    yedekHatirlatmaGunu = prefs.getInt('yedek_hatirlatma_gun') ?? 14;
-    otoYedekFoto = prefs.getBool('oto_yedek_foto') ?? false;
-    otoYedekAcik = prefs.getBool('oto_yedek_acik') ?? true;
-    final int kayitliOtoGun = prefs.getInt('oto_yedek_gunu') ?? 1;
-    otoYedekGunu = (kayitliOtoGun == 2 || kayitliOtoGun == 3 || kayitliOtoGun == 7) ? kayitliOtoGun : 1;
-    haftaOzetiAcik = prefs.getBool('hafta_ozeti_acik') ?? true;
-    final int kayitliErteleme = prefs.getInt('erteleme_dk') ?? 10;
-    ertelemeDk = const [5, 10, 15, 30, 60].contains(kayitliErteleme) ? kayitliErteleme : 10;
-    final int kayitliHaftaGunu = prefs.getInt('hafta_ozeti_gunu') ?? 7;
-    haftaOzetiGunu = (kayitliHaftaGunu >= 1 && kayitliHaftaGunu <= 7) ? kayitliHaftaGunu : 7;
-    haftaOzetiSaati = prefs.getInt('hafta_ozeti_saati') ?? 960;
-    _sonOtoYedek = DateTime.tryParse(prefs.getString('son_oto_yedek') ?? '');
-    _sonOtoYedekHata = prefs.getString('son_oto_yedek_hata');
-    try {
-      final dynamic hafiza = jsonDecode(prefs.getString('kategori_hafiza') ?? '{}');
-      if (hafiza is Map) _kategoriHafizasi = hafiza.map((k, v) => MapEntry(k.toString(), v.toString()));
-    } catch (_) {
-      _kategoriHafizasi = {};
-    }
-    elleYedekFoto = prefs.getBool('elle_yedek_foto') ?? true;
-    final String? sesE = prefs.getString('ses_etkinlik');
-    final String? sesO = prefs.getString('ses_odeme');
-    if (sesE != null && bildirimSesleri.containsKey(sesE)) sesEtkinlik = sesE;
-    if (sesO != null && bildirimSesleri.containsKey(sesO)) sesOdeme = sesO;
-    sessizdaCal = prefs.getBool('sessizda_cal') ?? false;
-    titresimAcik = prefs.getBool('titresim_acik') ?? true;
-    sabahOzetiAcik = prefs.getBool('sabah_ozeti_acik') ?? true;
-    sabahOzetiSaati = prefs.getInt('sabah_ozeti_saati') ?? 480;
-    final int kayitliCop = prefs.getInt('cop_suresi_gun') ?? 14;
-    copSuresiGun = (kayitliCop == 7 || kayitliCop == 30) ? kayitliCop : 14;
+    _genelAyarlariOku(prefs);
     final String? yedekMetni = prefs.getString('son_yedek');
     if (yedekMetni != null) _sonYedekTarihi = DateTime.tryParse(yedekMetni);
     final String? ilkMetni = prefs.getString('ilk_kullanim');
@@ -8762,7 +8776,7 @@ class _AnaEkranState extends State<AnaEkran> with WidgetsBindingObserver {
         }
       }
       final Uint8List? foto = _profilFotolari[p.id];
-      profilListesi.add({'id': p.id, 'ad': p.ad, 'veri': veri, 'foto': foto == null ? null : base64Encode(foto)});
+      profilListesi.add({...p.toJson(), 'veri': veri, 'foto': foto == null ? null : base64Encode(foto)});
     }
     final Map<String, String> etkinlikFotolari = {};
     final Directory? klasor = _fotoKlasoru;
@@ -8778,6 +8792,10 @@ class _AnaEkranState extends State<AnaEkran> with WidgetsBindingObserver {
       'tarih': DateTime.now().toIso8601String(),
       'aktifProfil': aktifProfilId,
       'profiller': profilListesi,
+      'ayarlar': {
+        for (final String k in _yedektekiAyarlar)
+          if (prefs.get(k) != null) k: prefs.get(k),
+      },
       'etkinlikFotolari': etkinlikFotolari,
     };
   }
@@ -9194,7 +9212,8 @@ class _AnaEkranState extends State<AnaEkran> with WidgetsBindingObserver {
       final List<Profil> yeniListe = [];
       for (final pm in yeniProfiller) {
         final String id = pm['id']?.toString() ?? 'p${DateTime.now().microsecondsSinceEpoch}';
-        yeniListe.add(Profil(id: id, ad: pm['ad']?.toString() ?? 'Profil'));
+        final Profil yp = Profil.fromJson({...pm.map((k, v) => MapEntry(k.toString(), v)), 'id': id});
+        yeniListe.add(Profil(id: id, ad: pm['ad']?.toString() ?? 'Profil', dogum: yp.dogum, telefon: yp.telefon, eposta: yp.eposta, sehir: yp.sehir));
         await prefs.setString('veri_$id', jsonEncode(pm['veri'] ?? <String, dynamic>{}));
         final dynamic foto = pm['foto'];
         if (foto is String && foto.isNotEmpty) await prefs.setString('profil_foto_$id', foto);
@@ -9202,6 +9221,23 @@ class _AnaEkranState extends State<AnaEkran> with WidgetsBindingObserver {
       final String yeniAktif = yeniListe.any((p) => p.id == yedekAktif) ? yedekAktif! : yeniListe.first.id;
       await prefs.setString('profiller', jsonEncode(yeniListe.map((p) => p.toJson()).toList()));
       await prefs.setString('aktif_profil', yeniAktif);
+      // Yedekteki genel ayarları geri yaz (eski yedeklerde bu bölüm yoktur)
+      final dynamic ayarlar = yedek['ayarlar'];
+      if (ayarlar is Map) {
+        for (final MapEntry<dynamic, dynamic> a in ayarlar.entries) {
+          final String k = a.key.toString();
+          if (!_yedektekiAyarlar.contains(k)) continue;
+          final dynamic v = a.value;
+          if (v is bool) {
+            await prefs.setBool(k, v);
+          } else if (v is int) {
+            await prefs.setInt(k, v);
+          } else if (v is String) {
+            await prefs.setString(k, v);
+          }
+        }
+        _genelAyarlariOku(prefs);
+      }
       // Bir yedek dosyasından dönüldüyse o dosya telefon dışında bir yedektir: hatırlatma sayacı onun tarihinden başlar
       if (yedek['otomatik'] != true && yedekTarihi != null && (_sonYedekTarihi == null || yedekTarihi.isAfter(_sonYedekTarihi!))) {
         _sonYedekTarihi = yedekTarihi;
